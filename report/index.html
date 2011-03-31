@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html> 
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta http-equiv="content-script-type" content="text/javascript">
+	<link rel="shortcut icon" href="../favicon.png" type="image/x-icon">
+	<link rel="stylesheet" href="../css/master.css" type="text/css" media="screen" charset="utf-8">
+	<script type="text/javascript" src="../js/jquery-1.4.4.js"></script>
+	<script type="text/javascript" src="../js/ticker-1.2.js"></script>
+	<script type="text/javascript" src="../js/cookie.js"></script>
+	<script type="text/javascript">
+
+		function guidGenerator() {
+			var S4 = function() {
+				return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+			};
+			return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+		}
+
+		$(document).ready(function(){
+			getTickerRSS();
+			if( ($.cookie("sukeyuuid")==null) || ($.cookie("sukeyuuid")===undefined) ){
+				$.cookie("sukeyuuid", guidGenerator(), { expires: 7 });
+			}
+			$('#uuid').val($.cookie("sukeyuuid"));
+			$('textarea').focus(function(){
+				if(this.value==this.defaultValue){
+					this.value='';
+					$(this).css('color','black');
+				}
+			}).blur(function(){
+				if(this.value==''){
+					this.value=this.defaultValue;
+					$(this).css('color','darkgrey');
+				}
+			}).css('color','darkgrey');
+			$('#submit').click(function(){
+				var $what  = $('textarea[name=what]');
+				var $where = $('textarea[name=where]');
+				var $uuid  = $('input[name=uuid]');
+				if( ($what[0].value == $what[0].defaultValue) || ($where[0].value == $where[0].defaultValue) ){
+					alert("Please supply some information before sending");
+					return false;
+				}
+				$.get("http://sukey.org/sukey2/apiReceiveReport.php", {
+					what: $what.val(),
+					where: $where.val(),
+					uuid: $uuid.val()
+				}, function(result){
+					if(result=="Reported: OK"){
+						alert("Report received. Ta!");
+						$('textarea').each(function(){
+							this.value = ''
+							$(this).blur();
+						});
+					}else{
+						alert("There was an error :-(");
+					}
+				});
+			});
+		});
+	</script>
+	<title>Sukey App: Report</title>
+</head>
+<body id="stage" class="theme">
+	<div id="container" align="left">
+		<div id="ticker"></div>
+	</div>
+	<div id="sukey" onclick="location.href='http://sukey.org/webapp/';"></div>
+	<div align="center">
+			<form id="ss-form"> 
+			<br> 
+			<div class="errorbox-good"> 
+				<div class="ss-item ss-item-required ss-paragraph-text">
+					<div class="ss-form-entry"><label class="ss-q-title" for="entry_0">What is happening?</label> 
+						<!-- <label class="ss-q-help" for="entry_0">Try to give specific details e.g. numbers, directions etc.</label> -->
+						<br>
+						<textarea name="what" rows="3" cols="40" class="ss-q-long" id="entry_0">Try to give specific details e.g. numbers, directions etc.</textarea>
+					</div>
+				</div>
+			</div> 
+			<br>
+			<div class="errorbox-good"> 
+				<div class="ss-item ss-item-required ss-paragraph-text">
+					<div class="ss-form-entry"><label class="ss-q-title" for="entry_1">Where is it happening?</label> 
+						<!--<label class="ss-q-help" for="entry_1">Road intersections, landmarks etc</label>-->
+						<br>
+						<textarea name="where" rows="3" cols="40" class="ss-q-long" id="entry_1">Road intersections, landmarks etc</textarea>
+					</div>
+				</div>
+			</div> 
+			<br> 
+			<input type="hidden" name="uuid" value="" id="uuid" />
+			<div class="ss-item ss-navigate"><div class="ss-form-entry"> 
+			<a href="#" class="btn large" id="submit">Submit</a>
+				</div>
+			</div>
+			</form>
+			<p>Sukey &#169;&#824; 2011.</p>
+	</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0" />
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<link rel="shortcut icon" href="/favicon.png" type="image/x-icon" />
+		<title>Sukey App: Map View</title>
+		<link rel="stylesheet" href="../css/master.css" type="text/css" media="screen" title="no title" charset="utf-8">
+		<script type="text/javascript" src="../js/jquery-1.4.4.js"></script>
+		<script type="text/javascript" src="../js/ticker-1.2.js"></script>
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+		<script type="text/javascript">
+			var defaultloc = new google.maps.LatLng(51.50348, -0.126901);
+			var currloc = null;
+			var map;
+			var me = null;
+			var followMe = true;
+
+			function init() {
+				getTickerRSS();
+				map = new google.maps.Map(
+					document.getElementById('map'), {
+						zoom: 16,
+						center: defaultloc,
+						mapTypeId: google.maps.MapTypeId.ROADMAP,
+						draggable: true
+					}
+				);
+				mapviewlayer = new google.maps.KmlLayer(
+					'http://sukey.org/mapview.kml?' + (new Date().getTime()) , {
+						map: map,
+						preserveViewport: true,
+						clickable: false
+					}
+				);
+				
+				if (navigator.geolocation) {
+					navigator.geolocation.watchPosition(
+						locateSuccess,
+						locateError, {
+							enableHighAccuracy: true, maximumAge: 300*1000, timeout: 290*1000
+						}
+					);
+				} else locateError();
+			}
+
+			function locateError() {
+				if (currloc === null) {
+					currloc = defaultloc;
+				}
+			}
+
+			function locateSuccess(pos) {
+				currloc = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+				if (me === null) {
+					var bounds = new google.maps.LatLngBounds(defaultloc, defaultloc);
+					bounds.extend(currloc);
+					map.fitBounds(bounds);
+					me = new google.maps.Marker({
+						map: map,
+						draggable: false,
+						animation: google.maps.Animation.DROP,
+						position: currloc
+					});
+				}
+				if(followMe) {
+					map.setCenter(currloc);
+					followMe = false;
+				}
+
+			}
+			</script>
+</head>
+
+<body onload="init()">
+	<div id="container" align="left" style="margin-top:4px;">
+		<div id="ticker"></div>
+	</div>
+	<div id="sukey" onclick="location.href='http://sukey.org/webapp/';"></div>
+	<div id="map"></div>
+	<div id="footer" align="center">
+		<p>Sukey &#169;&#824; 2011.</p>
+	</div>
+</body> 
+</html> 
